@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+
+{% block title %}Payment for {{ course.title }}{% endblock %}
+
+{% block content %}
+<div class="mt-5">
+    <h2>Course Payment</h2>
+
+    <div class="alert alert-info">
+        You are purchasing: <strong>{{ course.title }}</strong>
+    </div>
+
+    <form method="post" class="mt-4">
+        {% csrf_token %}
+
+        <table class="table table-bordered table-hover">
+            <thead class="table-dark">
+                <tr>
+                    <th style="width: 30%">Payment Detail</th>
+                    <th>Input Area</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{ form.as_table }}
+            </tbody>
+        </table>
+
+        <div class="mt-4">
+            <button type="submit" class="btn btn-success btn-lg">Confirm and Pay {{ course.price }} $</button>
+            <a href="{% url 'shop:index' %}" class="btn btn-outline-secondary btn-lg ms-2">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

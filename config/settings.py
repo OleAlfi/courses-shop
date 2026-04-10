@@ -77,6 +77,9 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
+        'OPTIONS': {
+            'timeout': 20,
+        },
     }
 }
 
@@ -117,5 +120,6 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
-LOGIN_REDIRECT_URL = 'shop:courses'
-LOGOUT_REDIRECT_URL = 'shop:index'
+LOGIN_REDIRECT_URL = 'shop:index'
+LOGOUT_REDIRECT_URL = 'login'
+LOGIN_URL = 'login'

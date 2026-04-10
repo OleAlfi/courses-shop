@@ -3,26 +3,92 @@
 {% block title %}All Courses{% endblock %}
 
 {% block content %}
-<table class="table mt-5 table-bordered table-striped table-hover">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+<form method="GET" action="{% url 'shop:index' %}" class="d-flex mb-4">
+    <input type="text" name="q" class="form-control me-2" placeholder="Search courses..." value="{{ request.GET.q }}">
+    <button type="submit" class="btn btn-outline-primary">Search</button>
+    <a href="{% url 'shop:index' %}" class="btn btn-outline-secondary ms-2">Reset</a>
+</form>
+
+<table class="table mt-5 table-bordered table-striped table-hover align-middle">
     <thead class="table-dark">
-    <tr>
-        <th>Title</th>
-        <th>Category</th>
-        <th>Price</th>
-        <th>Students Quantity</th>
-        <th></th>
-    </tr>
+        <tr>
+            <th>Title</th>
+            <th>Category</th>
+            <th>Price</th>
+            <th>Students in a class</th>
+            <th>Rating</th>
+            <th style="width: 35%;">You will learn</th>
+            <th></th>
+        </tr>
     </thead>
     <tbody>
-    {% for course in courses %}
-    <tr>
-        <td><a href="{% url "shop:single_course" course.id %}">{{ course.title }}</a></td>
-        <td>{{ course.category }}</td>
-        <td>{{ course.price }} $</td>
-        <td>{{ course.students_quantity }}</td>
-        <td><button class="btn btn-primary">Buy</button>></td>
-    </tr>
-    {% endfor %}
+        {% for course in courses %}
+        <tr>
+            <td><a href="{% url 'shop:single_course' course.id %}" class="fw-bold">{{ course.title }}</a></td>
+            <td>{{ course.category }}</td>
+            <td>{{ course.price }} $</td>
+            <td>{{ course.students_quantity }}</td>
+            <td class="text-nowrap">{{ course.get_average_rating }} ⭐</td>
+
+            <td>
+                <div class="small">
+                    <ul class="list-unstyled mb-0">
+                        {% for line in course.short_description.splitlines %}
+                            {% if line.strip %}
+                                <li class="d-flex align-items-start mb-1 text-secondary">
+                                    <i class="bi bi-check2 text-success fw-bold me-2"></i>
+                                    <span>{{ line }}</span>
+                                </li>
+                            {% endif %}
+                        {% endfor %}
+                    </ul>
+                </div>
+            </td>
+
+            <td><a href="{% url 'shop:payment' course.id %}" class="btn btn-primary btn-lg">Buy Now</a></td>
+        </tr>
+        {% endfor %}
     </tbody>
 </table>
+
+{% if is_paginated %}
+<nav class="mt-4">
+    <ul class="pagination justify-content-center">
+        {% if page_obj.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page=1&q={{ request.GET.q }}">&laquo; First</a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.previous_page_number }}&q={{ request.GET.q }}">Previous</a>
+            </li>
+        {% endif %}
+
+        <li class="page-item disabled">
+            <span class="page-link">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+        </li>
+
+        {% if page_obj.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.next_page_number }}&q={{ request.GET.q }}">Next</a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}&q={{ request.GET.q }}">Last &raquo;</a>
+            </li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+
+<style>
+    /* Щоб іконки не стискалися */
+    .bi-check2 {
+        flex-shrink: 0;
+    }
+    /* Вирівнювання таблиці, щоб текст не "стрибав" */
+    .table td {
+        vertical-align: middle;
+    }
+</style>
 {% endblock %}

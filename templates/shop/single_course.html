@@ -3,47 +3,121 @@
 {% block title %}{{ course.title }}{% endblock %}
 
 {% block content %}
-<div class="mt-5">
-    <h2>Course Details: {{ course.title }}</h2>
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-lg-8 offset-lg-2">
+            <h2 class="mb-4">Course Details: {{ course.title }}</h2>
 
-    <table class="table table-bordered table-striped table-hover mt-3">
-        <thead class="table-dark">
-            <tr>
-                <th style="width: 30%">Field</th>
-                <th>Value</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td class="fw-bold">Title</td>
-                <td>{{ course.title }}</td>
-            </tr>
-            <tr>
-                <td class="fw-bold">Category</td>
-                <td>{{ course.category.title }}</td>
-            </tr>
-            <tr>
-                <td class="fw-bold">Price</td>
-                <td>{{ course.price }} $</td>
-            </tr>
-            <tr>
-                <td class="fw-bold">Students Quantity</td>
-                <td>{{ course.students_quantity }}</td>
-            </tr>
-            <tr>
-                <td class="fw-bold">Reviews</td>
-                <td>{{ course.reviews_quantity }}</td>
-            </tr>
-            <tr>
-                <td class="fw-bold">Date Created</td>
-                <td>{{ course.created_at|date:"Y-m-d H:i" }}</td>
-            </tr>
-        </tbody>
-    </table>
+            <div class="card shadow-sm mb-4">
+                <table class="table table-hover mb-0">
+                    <thead class="table-dark">
+                        <tr>
+                            <th style="width: 35%">Field</th>
+                            <th>Value</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="fw-bold">Category</td>
+                            <td><span class="badge bg-secondary">{{ course.category.title }}</span></td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold">Price</td>
+                            <td class="text-success fw-bold">{{ course.price }} $</td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold">Average Rating</td>
+                            <td>
+                                <span class="text-warning">★</span>
+                                {{ course.get_average_rating }} / 5.0
+                                <small class="text-muted">({{ course.reviews.count }} reviews)</small>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold">Students in a class</td>
+                            <td>{{ course.students_quantity }}</td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold">Description</td>
+                            <td>{{ course.description|linebreaks }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
 
-    <div class="mt-4">
-        <button class="btn btn-primary btn-lg">Buy Now</button>
-        <a href="{% url 'shop:index' %}" class="btn btn-secondary btn-lg ms-2">Back to List</a>
+            <div class="d-flex gap-2 mb-5">
+                <a href="{% url 'shop:payment' course.id %}" class="btn btn-primary btn-lg px-4">Buy Now</a>
+                <a href="{% url 'shop:index' %}" class="btn btn-outline-secondary btn-lg px-4">Back to List</a>
+            </div>
+
+            <hr class="my-5">
+
+            <div class="card p-4 border-0 bg-light shadow-sm mb-5">
+                <h4 class="card-title mb-4">Share Your Opinion</h4>
+
+                {% if user.is_authenticated %}
+                    {% if user_already_reviewed %}
+                        <div class="alert alert-info d-flex align-items-center" role="alert">
+                            <i class="bi bi-info-circle-fill me-2"></i>
+                            <div>
+                                You have already reviewed this course. Thank you for your feedback!
+                            </div>
+                        </div>
+                    {% else %}
+                        <form method="post" novalidate>
+                            {% csrf_token %}
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Your Rating</label>
+                                {{ review_form.rating }}
+                                {% if review_form.rating.errors %}
+                                    <div class="text-danger small">{{ review_form.rating.errors }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Comment</label>
+                                {{ review_form.comment }}
+                                {% if review_form.comment.errors %}
+                                    <div class="text-danger small">{{ review_form.comment.errors }}</div>
+                                {% endif %}
+                            </div>
+                            <button type="submit" class="btn btn-success px-4">Submit Review</button>
+                        </form>
+                    {% endif %}
+                {% else %}
+                    <div class="text-center py-3">
+                        <p class="text-muted">Want to leave a review?</p>
+                        <a href="{% url 'login' %}" class="btn btn-outline-primary">Log in to your account</a>
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="reviews-section">
+                <h3 class="mb-4">Student Feedback</h3>
+
+                {% for review in course.reviews.all %}
+                    <div class="card mb-3 border-0 shadow-sm">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <div>
+                                    <h6 class="fw-bold mb-0 text-dark">@{{ review.user.username }}</h6>
+                                    <small class="text-muted">{{ review.created_at|date:"d M Y" }}</small>
+                                </div>
+                                <span class="badge bg-warning text-dark px-3 py-2">
+                                    {{ review.rating }} / 5 ⭐
+                                </span>
+                            </div>
+                            <p class="card-text text-secondary mt-3">
+                                {{ review.comment|default:"No comment provided." }}
+                            </p>
+                        </div>
+                    </div>
+                {% empty %}
+                    <div class="text-center py-5 bg-light rounded">
+                        <p class="text-muted mb-0">No reviews yet. Be the first to rate this course!</p>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
     </div>
 </div>
 {% endblock %}
