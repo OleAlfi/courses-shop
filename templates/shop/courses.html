@@ -47,7 +47,13 @@
                 </div>
             </td>
 
-            <td><a href="{% url 'shop:payment' course.id %}" class="btn btn-primary btn-lg">Buy Now</a></td>
+            <td>
+                {% if course.id in bought_course_ids %}
+                    <button class="btn btn-secondary disabled w-100">Purchased</button>
+                {% else %}
+                    <a href="{% url 'shop:payment' course.id %}" class="btn btn-primary w-100">Buy Now</a>
+                {% endif %}
+            </td>
         </tr>
         {% endfor %}
     </tbody>
@@ -82,11 +88,9 @@
 {% endif %}
 
 <style>
-    /* Щоб іконки не стискалися */
     .bi-check2 {
         flex-shrink: 0;
     }
-    /* Вирівнювання таблиці, щоб текст не "стрибав" */
     .table td {
         vertical-align: middle;
     }

@@ -1,3 +1,4 @@
+from django.contrib.auth.models import User
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 from django.db.models import Avg
@@ -43,4 +44,15 @@ class Review(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - {self.course.title} ({self.rating})"
+
+class Order(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='orders')
+    course = models.ForeignKey(Course, on_delete=models.CASCADE)
+    ordered_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ("course", "user")
+
+    def __str__(self):
+        return f"{self.user.username} bought {self.course.title}"
 
