@@ -3,7 +3,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponse
 from django.views.generic import ListView, DetailView
-from .models import Course, Review
+from .models import Course, Review, Order
 from django.contrib.auth import login
 from .forms import PaymentForm, RegisterForm, ReviewForm
 from django.contrib import messages
@@ -21,6 +21,13 @@ class CourseListView(LoginRequiredMixin, ListView):
         if query:
             queryset = queryset.filter(title__icontains=query)
         return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        if self.request.user.is_authenticated:
+            bought_course_ids = Order.objects.filter(user=self.request.user).values_list('course_id', flat=True)
+            context['bought_course_ids'] = bought_course_ids
+        return context
 
 class CourseDetailView(LoginRequiredMixin, DetailView):
     model = Course
@@ -74,11 +81,25 @@ def signup(request):
 @login_required
 def payment(request, course_id):
     course = get_object_or_404(Course, pk=course_id)
+
+    if Order.objects.filter(user=request.user, course=course).exists():
+        messages.info(request, "You already own this course!")
+        return redirect("shop:index")
+
     if request.method == "POST":
         form = PaymentForm(request.POST)
         if form.is_valid():
+            Order.objects.create(user=request.user, course=course)
             messages.success(request, f"Payment for {course.title} successful! Enjoy your learning.")
             return redirect("shop:index")
     else:
         form = PaymentForm(initial={"amount": course.price})
     return render(request, "shop/payment.html", {"course": course, "form": form})
+
+class OrderListView(LoginRequiredMixin, ListView):
+    model = Order
+    template_name = "shop/my_courses.html"
+    context_object_name = "orders"
+
+    def get_queryset(self):
+        return Order.objects.filter(user=self.request.user).select_related('course')
