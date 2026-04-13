@@ -11,7 +11,7 @@
     <a href="{% url 'shop:index' %}" class="btn btn-outline-secondary ms-2">Reset</a>
 </form>
 
-<table class="table mt-5 table-bordered table-striped table-hover align-middle">
+<table class="table mt-5 table-bordered table-striped table-hover align-middle text-center">
     <thead class="table-dark">
         <tr>
             <th>Title</th>
@@ -32,7 +32,7 @@
             <td>{{ course.students_quantity }}</td>
             <td class="text-nowrap">{{ course.get_average_rating }} ⭐</td>
 
-            <td>
+            <td class="text-start">
                 <div class="small">
                     <ul class="list-unstyled mb-0">
                         {% for line in course.short_description.splitlines %}
@@ -60,39 +60,60 @@
 </table>
 
 {% if is_paginated %}
-<nav class="mt-4">
+<nav aria-label="Page navigation" class="mt-5">
     <ul class="pagination justify-content-center">
         {% if page_obj.has_previous %}
             <li class="page-item">
-                <a class="page-link" href="?page=1&q={{ request.GET.q }}">&laquo; First</a>
+                <a class="page-link border-0 shadow-sm rounded-pill px-3 me-2"
+                   href="?page=1&q={{ request.GET.q }}">
+                    <span aria-hidden="true">&laquo; First</span>
+                </a>
             </li>
             <li class="page-item">
-                <a class="page-link" href="?page={{ page_obj.previous_page_number }}&q={{ request.GET.q }}">Previous</a>
+                <a class="page-link border-0 shadow-sm rounded-pill px-3 me-2"
+                   href="?page={{ page_obj.previous_page_number }}&q={{ request.GET.q }}">
+                    &larr; Previous
+                </a>
             </li>
         {% endif %}
 
         <li class="page-item disabled">
-            <span class="page-link">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+            <span class="page-link border-0 shadow-sm rounded-pill px-4 fw-bold bg-white text-dark">
+                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+            </span>
         </li>
-
         {% if page_obj.has_next %}
             <li class="page-item">
-                <a class="page-link" href="?page={{ page_obj.next_page_number }}&q={{ request.GET.q }}">Next</a>
+                <a class="page-link border-0 shadow-sm rounded-pill px-3 ms-2"
+                   href="?page={{ page_obj.next_page_number }}&q={{ request.GET.q }}">
+                    Next &rarr;
+                </a>
             </li>
             <li class="page-item">
-                <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}&q={{ request.GET.q }}">Last &raquo;</a>
+                <a class="page-link border-0 shadow-sm rounded-pill px-3 ms-2"
+                   href="?page={{ page_obj.paginator.num_pages }}&q={{ request.GET.q }}">
+                    Last &raquo;
+                </a>
             </li>
         {% endif %}
+
     </ul>
 </nav>
 {% endif %}
 
 <style>
-    .bi-check2 {
-        flex-shrink: 0;
+    .page-link {
+        transition: all 0.2s ease;
+        color: #6c757d;
     }
-    .table td {
-        vertical-align: middle;
+    .page-link:hover {
+        background-color: #f8f9fa;
+        color: #0d6efd;
+        transform: translateY(-1px);
+    }
+    .page-item.disabled .page-link {
+        background-color: #ffffff;
+        opacity: 0.6;
     }
 </style>
 {% endblock %}
